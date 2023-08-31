@@ -1,4 +1,3 @@
-#COPIED DIRECTLY FROM https://github.com/DataTell/sqlalchemy-challenge/blob/master/ClimateSQLAlchemy/app.py 
 
 import numpy as np
 import re
@@ -13,13 +12,12 @@ from sqlalchemy.sql import exists
 from flask import Flask, jsonify
 
 
-#################################################
 # Database Setup
-#################################################
 engine = create_engine("sqlite:///Resources/hawaii.sqlite")
 
 # reflect an existing database into a new model
 Base = automap_base()
+
 # reflect the tables
 Base.prepare(engine, reflect=True)
 
@@ -27,16 +25,11 @@ Base.prepare(engine, reflect=True)
 Measurement = Base.classes.measurement
 Station = Base.classes.station
 
-#################################################
 # Flask Setup
-#################################################
 app = Flask(__name__)
 
 
-#################################################
 # Flask Routes
-#################################################
-
 @app.route("/")
 def welcome():
     """List all available api routes."""
@@ -51,7 +44,8 @@ def welcome():
     )
 
 
-@app.route("/api/v1.0/precipitation") #Convert query results to a dictionary using `date` as the key and `tobs` as the value
+@app.route("/api/v1.0/precipitation") 
+#Convert query results to a dictionary using `date` as the key and `tobs` as the value
 def precipitation():
     # Create session (link) from Python to the DB
     session = Session(engine)
@@ -71,7 +65,8 @@ def precipitation():
     return jsonify(precipitation_date_tobs)
 
 
-@app.route("/api/v1.0/stations") #Return a JSON list of stations from the dataset
+@app.route("/api/v1.0/stations") 
+#Return a JSON list of stations from the dataset
 def stations():
     # Create session (link) from Python to the DB
     session = Session(engine)
@@ -85,7 +80,8 @@ def stations():
     return jsonify(station_details)
 
 
-@app.route("/api/v1.0/tobs") # Query the dates and temperature observations of the most active station for the last year of data
+@app.route("/api/v1.0/tobs") 
+# Query the dates and temperature observations of the most active station for the last year of data
 def tobs():
     # Create our session (link) from Python to the DB
     session = Session(engine)
@@ -129,7 +125,8 @@ def tobs():
     return jsonify(tobs_list)
 
 
-@app.route("/api/v1.0/<start>") # Calculate `TMIN`, `TAVG`, and `TMAX` for all dates greater than and equal to the start date
+@app.route("/api/v1.0/<start>") 
+# Calculate `TMIN`, `TAVG`, and `TMAX` for all dates greater than and equal to the start date
 def start_only(start):
 
     # Create session (link) from Python to the DB
@@ -152,25 +149,26 @@ def start_only(start):
  
     if valid_entry:
 
-    	results = (session.query(func.min(Measurement.tobs)
+        results = (session.query(func.min(Measurement.tobs)
     				 ,func.avg(Measurement.tobs)
     				 ,func.max(Measurement.tobs))
     				 	  .filter(Measurement.date >= start).all())
 
-    	tmin =results[0][0]
-    	tavg ='{0:.4}'.format(results[0][1])
-    	tmax =results[0][2]
+    tmin =results[0][0]
+    tavg ='{0:.4}'.format(results[0][1])
+    tmax =results[0][2]
     
-    	result_printout =( ['Entered Start Date: ' + start,
+    result_printout =( ['Entered Start Date: ' + start,
     						'The lowest Temperature was: '  + str(tmin) + ' F',
     						'The average Temperature was: ' + str(tavg) + ' F',
     						'The highest Temperature was: ' + str(tmax) + ' F'])
-    	return jsonify(result_printout)
+    return jsonify(result_printout)
 
     return jsonify({"error": f"Input Date {start} not valid. Date Range is {date_range_min_str} to {date_range_max_str}"}), 404
    
 
-@app.route("/api/v1.0/<start>/<end>") # Calculate the `TMIN`, `TAVG`, and `TMAX` for dates between the start and end date inclusive
+@app.route("/api/v1.0/<start>/<end>") 
+# Calculate the `TMIN`, `TAVG`, and `TMAX` for dates between the start and end date inclusive
 def start_end(start, end):
 
     # Create session (link) from Python to the DB
@@ -201,16 +199,16 @@ def start_end(start, end):
     					  .filter(Measurement.date >= start)
     				  	  .filter(Measurement.date <= end).all())
 
-    	tmin =results[0][0]
-    	tavg ='{0:.4}'.format(results[0][1])
-    	tmax =results[0][2]
+    tmin =results[0][0]
+    tavg ='{0:.4}'.format(results[0][1])
+    tmax =results[0][2]
     
-    	result_printout =( ['Entered Start Date: ' + start,
+    result_printout =( ['Entered Start Date: ' + start,
     						'Entered End Date: ' + end,
     						'The lowest Temperature was: '  + str(tmin) + ' F',
     						'The average Temperature was: ' + str(tavg) + ' F',
     						'The highest Temperature was: ' + str(tmax) + ' F'])
-    	return jsonify(result_printout)
+    return jsonify(result_printout)
 
     if not valid_entry_start and not valid_entry_end:
     	return jsonify({"error": f"Input Start {start} and End Date {end} not valid. Date Range is {date_range_min_str} to {date_range_max_str}"}), 404
